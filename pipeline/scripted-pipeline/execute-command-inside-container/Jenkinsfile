@@ -1,0 +1,11 @@
+node {
+    stage('Run') {
+        // try to fetch latest upstream image
+        docker.image('ubuntu:16.04').pull()
+
+        // execute tasks inside container
+        docker.image('ubuntu:16.04').inside {
+            echo 'it is now inside container' // print some string
+        }
+    }
+}

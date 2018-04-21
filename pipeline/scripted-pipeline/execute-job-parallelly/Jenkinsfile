@@ -1,0 +1,12 @@
+node {
+  stage('Parallel Run') {
+    parallel(
+      "Job 1": {
+        echo 'test for Job #1'
+      },
+      "Job 2": {
+        echo 'test for Job #2'
+      }
+    )
+  }
+}

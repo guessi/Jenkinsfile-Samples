@@ -1,0 +1,21 @@
+def project_url = 'http://jenkins.example.com:8080/project/demo-project'
+
+properties([
+    gitLabConnection(project_url),
+    pipelineTriggers([
+        [
+            $class: 'GitLabPushTrigger',
+            branchFilterType: 'All',
+            triggerOnPush: true,
+            triggerOnMergeRequest: false,
+            ciSkip: true,
+            secretToken: "a6eac20fae98e54b1a37c81d09276782"
+        ]
+    ])
+])
+
+node {
+    stage('Run') {
+        echo 'demo for trigger by commit hook'        
+    }
+}

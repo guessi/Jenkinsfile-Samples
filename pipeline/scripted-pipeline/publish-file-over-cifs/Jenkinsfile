@@ -1,0 +1,39 @@
+//
+// **KNOWN ISSUE**
+//
+// - cifsPublisher does not work with declarative pipeline
+//
+//
+
+def CIFS_configName: 'CIFS_Server_Definition'
+def CIFS_remoteDirectory = 'path\\to\\folder'
+
+node {}
+    stage('Run') {
+        // generate fake file
+        bat "echo > fake.zip"
+
+        // publish file over CIFS protocol
+        cifsPublisher alwaysPublishFromMaster: false,
+            continueOnError: false,
+            failOnError: false,
+                publishers: [[
+                    configName: CIFS_configName,
+                    transfers: [[
+                        cleanRemote: false,
+                        excludes: '',
+                        flatten: false,
+                        makeEmptyDirs: false,
+                        noDefaultExcludes: false,
+                        patternSeparator: '[, ]+',
+                        remoteDirectory: CIFS_remoteDirectory,
+                        remoteDirectorySDF: false,
+                        removePrefix: '',
+                        sourceFiles: '*.zip'
+                    ]],
+                    usePromotionTimestamp: false,
+                    useWorkspaceInPromotion: false,
+                    verbose: false
+                ]]
+    }
+}

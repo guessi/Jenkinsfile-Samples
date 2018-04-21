@@ -1,0 +1,16 @@
+node {
+    stage('Run') {
+        // make sure we are running under clean workspace
+        deleteDir()
+
+        // try to fetch latest
+        docker.image('ubuntu:16.04').pull()
+
+        // execute script inside docker
+        docker.image('ubuntu:16.04').inside {
+            // clone repository with credential
+            git url: 'https://github.com/docker/dockercloud-hello-world.git',
+                branch: master
+        }
+    }
+}

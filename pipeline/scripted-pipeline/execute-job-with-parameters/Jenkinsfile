@@ -1,0 +1,75 @@
+def advanced_choices = [
+    '---- PLEASE SELECT YOUR CHOICE ----',
+    'item1',
+    'item2',
+    'item3',
+ ]
+
+// define job properties
+// **WARNING** it will overwrite all the settings on Jenkins Web UI
+properties([
+    buildDiscarder(
+        logRotator(
+            numToKeepStr: '30'
+        )
+    ),
+    disableConcurrentBuilds(),
+    parameters([
+        choice(
+            choices:
+                '--- SIMPLE CHOICE ---' + '\n' +
+                'SIMPLE1' + '\n' +
+                'SIMPLE2' + '\n' +
+                'SIMPLE3'
+            ,
+            description: 'please select your choice from dropdown menu',
+            name: 'SIMPLE_CHOICE'
+        ),
+        choice(
+            choices: advanced_choices.join('\n'),
+            description: 'please select your choice from dropdown menu',
+            name: 'ADVANCED_CHOICE'
+        ),
+        string(
+            defaultValue: 'defaultValue',
+            description: 'please input your customized string here',
+            name: 'SIMPLE_STRING'
+        ),
+        [
+            $class: 'ValidatingStringParameterDefinition',
+            defaultValue: 'busybox-deployment.yaml',
+            description: 'path to yaml or json file',
+            failedValidationMessage: 'Invalid format',
+            name: 'STRING_WITH_VALIDATION',
+            regex: '^[a-zA-Z0-9]+([-]?[a-zA-Z0-9]+)+\\.(json|yaml|yml)$'
+        ],
+        booleanParam(
+            defaultValue: true,
+            description: 'Default: DRY_RUN by default',
+            name: 'DRY_RUN'
+        )
+    ])
+])
+
+
+node {
+    stage('Run') {
+        // abort if no option selected
+        if (params.ADVANCED_CHOICE == advanced_choices[0]) {
+            error 'no kind selected'
+        }
+
+        // debug
+        echo("[debug] SIMPLE_CHOICE: " + params.SIMPLE_CHOICE)
+        echo("[debug] ADVANCED_CHOICE: " + params.ADVANCED_CHOICE)
+        echo("[debug] SIMPLE_STRING: " + params.SIMLE_STRING)
+        echo("[debug] STRING_WITH_VALIDATION: " + params.STRING_WITH_VALIDATION)
+        echo("[debug] DRY_RUN: " + params.DRY_RUN.toString())
+
+        if (DRY_RUN == true) {
+            echo "it is running with DRY_RUN mode on"
+        } else {
+            echo "it is running with DRY_RUN mode off"
+        }
+    }
+}

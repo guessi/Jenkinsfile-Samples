@@ -1,0 +1,22 @@
+// modify following information before run
+def info = [
+  'account_id':    '987654321012',
+  'region':        'ap-northeast-1',
+  'image_name':    'path/to/repo',
+  'image_tag':     '1.2.3',
+  'credential_id': 'be1a7682-b6bd-4df5-87f5-553e64b596a4'
+]
+
+def ecr_repository = "${info.account_id}.dkr.ecr.${info.region}.amazonaws.com"
+def ecr_registry = "https://${ecr_repository}"
+def ecr_auth = "ecr:${info.region}:${info.credential_id}"
+def ecr_image = "${ecr_repository}/${info.image_name}:${info.image_tag}"
+
+node {
+    stage('Run') {
+        // try to fetch latest upstream image from ecr
+        docker.withRegistry(ecr_registry, ecr_auth) {
+            docker.image(ecr_image).pull()
+        }
+    }
+}

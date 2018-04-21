@@ -1,0 +1,73 @@
+properties([
+    buildDiscarder(
+        logRotator(numToKeepStr: '15')
+    ),
+    disableConcurrentBuilds(),
+    parameters([
+        credentials(
+            credentialType: 'org.jenkinsci.plugins.p4.credentials.P4PasswordImpl',
+            defaultValue: '5013b804-3183-4ff0-aa66-779257559848',
+            description: '',
+            name: 'P4_CREDENTIAL',
+            required: true
+        ),
+        string(
+            defaultValue: 'JenkinsClient',
+            description: 'Temporary Client Name for Code Syncing',
+            name: 'P4_CLIENT'
+        ),
+        // **WARNING**
+        // PLEASE REMOVE SPACE/TAB AT THE BEGINNING OF LINES
+        text(
+            defaultValue: '''
+//Path/to/directory/... //${P4_CLIENT}/Path/to/directory/...
+''',
+            description: 'View Maps for Code Syncing',
+            name: 'P4_VIEWMAPS'
+        ),
+        booleanParam(
+            defaultValue: false,
+            description: 'Reduce Output While Code Syncing',
+            name: 'QUIET_SYNC'
+        )
+    ]),
+])
+
+node {
+    stage("Run") {
+        // cleanup
+        deleteDir()
+
+        // create new directory for sync
+        sh('mkdir -p p4src')
+
+        // switch to p4src directory
+        dir("p4src") {
+            // checkout source from perforce
+            checkout perforce(
+                credential: P4_CREDENTIAL,
+                populate: forceClean(
+                    have: false,
+                    parallel: [
+                        enable: false,
+                        minbytes: '1024',
+                        minfiles: '1',
+                        threads: '4'
+                    ],
+                    pin: '',
+                    quiet: QUIET_SYNC.toBoolean()
+                ),
+                workspace: manualSpec(
+                    charset: 'none',
+                    name: P4_CLIENT,
+                    pinHost: false,
+                    spec: clientSpec(
+                        line: 'LOCAL',
+                        type: 'READONLY',
+                        view: P4_VIEWMAPS
+                    )
+                )
+            ) // end of checkout
+        } // end of dir
+    }
+}
