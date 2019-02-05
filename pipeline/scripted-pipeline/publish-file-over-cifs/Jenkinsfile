@@ -8,7 +8,7 @@
 def CIFS_configName: 'CIFS_Server_Definition'
 def CIFS_remoteDirectory = 'path\\to\\folder'
 
-node {}
+node {
     stage('Run') {
         // generate fake file
         bat "echo > fake.zip"
